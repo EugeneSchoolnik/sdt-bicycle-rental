@@ -1,0 +1,7 @@
+env: "local" # local, dev, prod
+database-path: "storage/sqlite/bicycle-rental.db"
+http-server:
+  host: "localhost"
+  port: 8080
+  timeout: 4s
+  iddle_timeout: 60s
