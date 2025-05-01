@@ -1,7 +1,15 @@
 env: "local" # local, dev, prod
-database-path: "storage/sqlite/bicycle-rental.db"
 http-server:
   host: "localhost"
   port: 8080
   timeout: 4s
   iddle_timeout: 60s
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: "postgres"
+  db-name: "bicycle-rental"
+  ssl-mode: "disable"
+  time-zone: "UTC"
+  max-open-conns: 3
+  max-idle-conns: 3
