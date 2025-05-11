@@ -40,8 +40,6 @@ func MustLoad() *Config {
 		panic(fmt.Errorf("failed to load .env file: %w", err))
 	}
 
-	fmt.Println(os.Getenv("POSTGRES_PASSWORD"))
-
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		panic("config path is not specified")
