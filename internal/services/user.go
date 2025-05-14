@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
+	"sdt-bicycle-rental/lib/logger/sl"
 	"sdt-bicycle-rental/lib/validation"
 
 	"github.com/go-playground/validator/v10"
@@ -31,7 +32,7 @@ func (s *UserService) ProfileByID(id uint64) (*models.User, error) {
 			return nil, ErrInvalidCredentials
 		}
 		// Handle other errors
-		s.log.Error(op, "failed to get user", slog.String("error", err.Error()))
+		s.log.Error(op, "failed to get user", sl.Err(err))
 		return nil, ErrInternalError
 	}
 

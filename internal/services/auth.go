@@ -54,6 +54,7 @@ func (s *AuthService) Register(user *models.User) (*models.User, string, error) 
 	}
 	// Set hashed password
 	user.Password = &hashedPassword
+
 	// Set user status
 	user.Status = Ptr(models.UserStatusActive)
 
