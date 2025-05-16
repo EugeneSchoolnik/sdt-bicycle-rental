@@ -43,14 +43,14 @@ func TestUserService_Register(t *testing.T) {
 			fields: defaultFields,
 			argUser: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Password: Ptr("password"),
 			},
 			want: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Status:   Ptr(models.UserStatusActive),
@@ -63,7 +63,7 @@ func TestUserService_Register(t *testing.T) {
 			fields: defaultFields,
 			argUser: &models.User{
 				Name:     Ptr(""),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Password: Ptr("password"),
@@ -76,7 +76,7 @@ func TestUserService_Register(t *testing.T) {
 			fields: defaultFields,
 			argUser: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr("invalid-email"),
 				Phone:    Ptr("1234567890"),
 				Password: Ptr("password"),
@@ -89,7 +89,7 @@ func TestUserService_Register(t *testing.T) {
 			fields: defaultFields,
 			argUser: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Password: Ptr(""),
@@ -102,7 +102,7 @@ func TestUserService_Register(t *testing.T) {
 			fields: defaultFields,
 			argUser: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Password: Ptr("password"),
@@ -181,13 +181,23 @@ func TestAuthService_Login(t *testing.T) {
 			},
 			want: &models.User{
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr(validEmail),
 				Phone:    Ptr("1234567890"),
 				Status:   Ptr(models.UserStatusActive),
 				Password: Ptr("$2a$10$Qz4ERCPWmdyNe7DR5H19RubOlA7drtlD9VCVYl8N9QjcqhueonsM6"),
 			},
 			wantErr: false,
+		},
+		{
+			name:   "invalid email",
+			fields: defaultFields,
+			args: args{
+				email:    invalidEmail,
+				password: "password",
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -200,6 +210,7 @@ func TestAuthService_Login(t *testing.T) {
 			}
 
 			got, got1, err := s.Login(tt.args.email, tt.args.password)
+			t.Logf("Error Message: %v", err)
 			isErr := err != nil
 			if isErr != tt.wantErr {
 				t.Errorf("AuthService.Login() error = %v, wantErr %v", err, tt.wantErr)

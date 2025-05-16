@@ -9,17 +9,19 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func PrettyError(errs validator.ValidationErrors) error {
+func PrettyError(validationErrs ...validator.ValidationErrors) error {
 	var errMsgs []string
 
-	for _, err := range errs {
-		switch err.ActualTag() {
-		case "required":
-			errMsgs = append(errMsgs, fmt.Sprintf("field %s is a required field", err.Field()))
-		case "email":
-			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid email", err.Field()))
-		default:
-			errMsgs = append(errMsgs, fmt.Sprintf("field %s is not valid", err.Field()))
+	for _, vErr := range validationErrs {
+		for _, err := range vErr {
+			switch err.ActualTag() {
+			case "required":
+				errMsgs = append(errMsgs, fmt.Sprintf("field %s is a required field", err.Field()))
+			case "email":
+				errMsgs = append(errMsgs, fmt.Sprintf("field %s is not a valid email", err.Field()))
+			default:
+				errMsgs = append(errMsgs, fmt.Sprintf("field %s is not valid", err.Field()))
+			}
 		}
 	}
 

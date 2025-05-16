@@ -13,7 +13,7 @@ const (
 type User struct {
 	ID        uint64     `gorm:"primaryKey;autoIncrement;type:BIGINT"`
 	Name      *string    `gorm:"type:varchar(64)" validate:"required,min=1,max=64"`
-	LastName  *string    `gorm:"type:varchar(64)" validate:"required,min=1,max=64"`
+	Lastname  *string    `gorm:"type:varchar(64)" validate:"required,min=1,max=64"`
 	Email     *string    `gorm:"type:varchar(255);uniqueIndex" validate:"required,email"`
 	Phone     *string    `gorm:"type:varchar(64);uniqueIndex" validate:"required,max=64"`
 	Status    *string    `gorm:"type:varchar(64)"`

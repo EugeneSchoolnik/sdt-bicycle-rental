@@ -53,7 +53,7 @@ func (s *UserService) Update(id uint64, user *dto.UpdateUserDTO) error {
 	updateUser := models.User{
 		ID:       id,
 		Name:     user.Name,
-		LastName: user.LastName,
+		Lastname: user.Lastname,
 		Email:    user.Email,
 		Phone:    user.Phone,
 	}

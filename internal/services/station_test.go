@@ -1,12 +1,15 @@
 package services
 
 import (
+	"errors"
 	"log/slog"
 	"reflect"
 	"sdt-bicycle-rental/internal/models"
 	mocks "sdt-bicycle-rental/internal/services/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"testing"
+
+	"gorm.io/gorm"
 )
 
 func TestStationService_Create(t *testing.T) {
@@ -150,6 +153,79 @@ func TestStationService_UpdateLocation(t *testing.T) {
 
 			if err := s.UpdateLocation(tt.args.id, tt.args.location); (err != nil) != tt.wantErr {
 				t.Errorf("StationService.UpdateLocation() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestStationService_ByID(t *testing.T) {
+	type fields struct {
+		repo StationRepositoty
+		log  *slog.Logger
+	}
+	defaultFields := fields{
+		repo: mocks.NewStationRepositoty(t),
+		log:  slogdiscard.NewDiscardLogger(),
+	}
+	type mockData struct {
+		notNeeded bool
+		err       error
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		argID   uint64
+		mock    mockData
+		want    *models.Station
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			fields:  defaultFields,
+			argID:   1,
+			want:    &models.Station{},
+			wantErr: false,
+		},
+		{
+			name:   "not found",
+			fields: defaultFields,
+			argID:  1,
+			mock: mockData{
+				err: gorm.ErrRecordNotFound,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:   "unexpected error",
+			fields: defaultFields,
+			argID:  1,
+			mock: mockData{
+				err: errors.New("unexpected error"),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &StationService{
+				repo: tt.fields.repo,
+				log:  tt.fields.log,
+			}
+
+			if !tt.mock.notNeeded {
+				s.repo.(*mocks.StationRepositoty).On("GetByID", tt.argID).Return(tt.want, tt.mock.err).Once()
+			}
+
+			got, err := s.ByID(tt.argID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StationService.ByID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StationService.ByID() = %v, want %v", got, tt.want)
 			}
 		})
 	}

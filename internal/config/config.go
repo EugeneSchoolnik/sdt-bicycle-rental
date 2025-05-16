@@ -13,6 +13,7 @@ type Config struct {
 	Env        string     `yaml:"env" env-default:"local"`
 	HTTPServer HTTPServer `yaml:"http-server"`
 	Postgres   Postgres   `yaml:"postgres"`
+	JwtSecret  string     `env:"JWT_SECRET" env-required:"true"`
 }
 
 type HTTPServer struct {

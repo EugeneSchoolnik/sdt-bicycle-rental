@@ -39,7 +39,7 @@ func TestUserService_ProfileByID(t *testing.T) {
 			want: &models.User{
 				ID:       43,
 				Name:     Ptr("John"),
-				LastName: Ptr("Doe"),
+				Lastname: Ptr("Doe"),
 				Email:    Ptr("valid@email.com"),
 			},
 			wantErr: false,
@@ -104,7 +104,7 @@ func TestUserService_Update(t *testing.T) {
 				id: 1,
 				user: &dto.UpdateUserDTO{
 					Name:     Ptr("John"),
-					LastName: Ptr("Doe"),
+					Lastname: Ptr("Doe"),
 					Email:    Ptr("valid@email.com"),
 				},
 			},
@@ -142,7 +142,7 @@ func TestUserService_Update(t *testing.T) {
 			updateModel := models.User{
 				ID:       tt.args.id,
 				Name:     tt.args.user.Name,
-				LastName: tt.args.user.LastName,
+				Lastname: tt.args.user.Lastname,
 				Email:    tt.args.user.Email,
 				Phone:    tt.args.user.Phone,
 			}

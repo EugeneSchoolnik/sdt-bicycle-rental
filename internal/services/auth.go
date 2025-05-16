@@ -71,7 +71,7 @@ func (s *AuthService) Register(user *models.User) (*models.User, string, error) 
 	}
 
 	// Generate JWT token
-	token, err := s.GenerateToken(user)
+	token, err := s.generateToken(user)
 	if err != nil {
 		s.log.Error(op, "failed to generate token", sl.Err(err))
 		return nil, "", ErrInternalError
@@ -84,9 +84,20 @@ func (s *AuthService) Login(email, password string) (*models.User, string, error
 	const op = "services.AuthService.Login"
 
 	// Validate email and password
-	if validate.Var(email, "required,email") != nil || validate.Var(password, "required,min=8,max=255") != nil {
+	emailErr := validate.Var(email, "required,email")
+	passErr := validate.Var(password, "required,min=8,max=255")
+	if emailErr != nil || passErr != nil {
 		s.log.Info(op, "validation error", slog.String("error", "invalid email or password"))
-		return nil, "", ErrInvalidCredentials
+
+		var errs []validator.ValidationErrors
+		if emailErr != nil && passErr != nil {
+			errs = append(errs, emailErr.(validator.ValidationErrors), passErr.(validator.ValidationErrors))
+		} else if emailErr != nil {
+			errs = append(errs, emailErr.(validator.ValidationErrors))
+		} else {
+			errs = append(errs, passErr.(validator.ValidationErrors))
+		}
+		return nil, "", validation.PrettyError(errs...)
 	}
 
 	// Get user by email
@@ -108,7 +119,7 @@ func (s *AuthService) Login(email, password string) (*models.User, string, error
 	}
 
 	// Generate JWT token
-	token, err := s.GenerateToken(user)
+	token, err := s.generateToken(user)
 	if err != nil {
 		s.log.Error(op, "failed to generate token", sl.Err(err))
 		return nil, "", ErrInternalError
@@ -117,7 +128,7 @@ func (s *AuthService) Login(email, password string) (*models.User, string, error
 	return user, token, nil
 }
 
-func (s *AuthService) GenerateToken(user *models.User) (string, error) {
+func (s *AuthService) generateToken(user *models.User) (string, error) {
 	// Define expiration time for the token
 	expirationTime := time.Now().Add(24 * time.Hour)
 
