@@ -1,8 +1,10 @@
 package postgres
 
 import (
+	"errors"
 	"sdt-bicycle-rental/internal/models"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +18,12 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (r *UserRepository) Create(user *models.User) error {
 	if err := r.db.Create(user).Error; err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return gorm.ErrDuplicatedKey // 23505 = unique_violation
+			}
+		}
 		return err
 	}
 	return nil
@@ -75,7 +83,7 @@ func (r *UserRepository) AnonymizeAndMarkDeleted(id uint64) error {
 	return r.db.Model(&models.User{}).Where("id = ?", id).
 		Updates(map[string]interface{}{
 			"name":       nil,
-			"last_name":  nil,
+			"lastname":   nil,
 			"email":      nil,
 			"phone":      nil,
 			"password":   nil,

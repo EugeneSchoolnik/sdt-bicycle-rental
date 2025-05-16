@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"sdt-bicycle-rental/internal/config"
-	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/repository"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -26,29 +26,9 @@ func New(cfg config.Postgres) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to db: %w", err)
 	}
 
-	if err := migrate(db); err != nil {
+	if err := repository.Migrate(db); err != nil {
 		return nil, fmt.Errorf("failed to migrate db: %w", err)
 	}
 
 	return db, nil
-}
-
-func migrate(db *gorm.DB) error {
-	var modelsToMigrate = []any{
-		&models.User{},
-		&models.Admin{},
-		&models.Station{},
-		&models.Bicycle{},
-		&models.Payment{},
-		&models.Booking{},
-		&models.Rental{},
-	}
-
-	for _, model := range modelsToMigrate {
-		if err := db.AutoMigrate(model); err != nil {
-			return fmt.Errorf("failed to migrate model %T: %w", model, err)
-		}
-	}
-
-	return nil
 }
