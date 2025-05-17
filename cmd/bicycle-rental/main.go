@@ -4,9 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 	"sdt-bicycle-rental/internal/config"
-	"sdt-bicycle-rental/internal/http-server/handlers/auth/register"
+	"sdt-bicycle-rental/internal/http-server/handlers/auth"
 	"sdt-bicycle-rental/internal/repository/postgres"
-	"sdt-bicycle-rental/internal/services"
 	"sdt-bicycle-rental/lib/logger"
 	"strconv"
 
@@ -29,6 +28,8 @@ func main() { // go run ./cmd/bicycle-rental/main.go
 	}
 	log.Info("Database initialized", slog.String("db_name", cfg.Postgres.DBName))
 
+	userRepo := postgres.NewUserRepository(db)
+
 	// Initialize the HTTP server
 	router := chi.NewRouter()
 
@@ -42,10 +43,7 @@ func main() { // go run ./cmd/bicycle-rental/main.go
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello world"))
 	})
-	router.Route("/auth", func(r chi.Router) {
-		authService := services.NewAuthService(postgres.NewUserRepository(db), log, cfg.JwtSecret)
-		r.Post("/register", register.New(authService, log))
-	})
+	router.Route("/auth", auth.AuthRoute(log, userRepo, cfg.JwtSecret))
 
 	// Start the server
 	httpAddr := ":" + strconv.Itoa(cfg.HTTPServer.Port)

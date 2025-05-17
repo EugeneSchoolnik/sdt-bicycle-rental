@@ -43,7 +43,9 @@ func (s *AuthService) Register(user *models.User) (*models.User, string, error) 
 	err := validate.Struct(user)
 	if err != nil {
 		s.log.Info(op, "validation error", sl.Err(err))
-		return nil, "", validation.PrettyError(err.(validator.ValidationErrors))
+		var validateErrs validator.ValidationErrors
+		errors.As(err, &validateErrs)
+		return nil, "", validation.PrettyError(validateErrs)
 	}
 
 	// Hash password
