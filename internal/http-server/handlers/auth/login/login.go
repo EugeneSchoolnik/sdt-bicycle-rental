@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sdt-bicycle-rental/internal/models"
-	"sdt-bicycle-rental/internal/services"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/sl"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -63,7 +63,7 @@ func New(s UserLoginer, log *slog.Logger) http.HandlerFunc {
 
 		user, token, err := s.Login(req.Email, req.Password)
 		if err != nil {
-			if errors.Is(err, services.ErrInternalError) {
+			if errors.Is(err, service.ErrInternalError) {
 				w.WriteHeader(http.StatusInternalServerError)
 			} else {
 				w.WriteHeader(http.StatusBadRequest)

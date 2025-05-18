@@ -1,4 +1,4 @@
-package services
+package auth_service
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/sl"
 	"sdt-bicycle-rental/lib/util"
 	"sdt-bicycle-rental/lib/validation"
@@ -33,7 +34,7 @@ type AuthService struct {
 	jwtSecret string
 }
 
-func NewAuthService(repo UserRepository, log *slog.Logger, jwtSecret string) *AuthService {
+func New(repo UserRepository, log *slog.Logger, jwtSecret string) *AuthService {
 	return &AuthService{repo: repo, log: log, jwtSecret: jwtSecret}
 }
 
@@ -41,7 +42,7 @@ func (s *AuthService) Register(userDto *dto.CreateUser) (*models.User, string, e
 	const op = "services.AuthService.Register"
 
 	// Validate user data
-	err := validate.Struct(userDto)
+	err := service.Validate.Struct(userDto)
 	if err != nil {
 		s.log.Info(op, "validation error", sl.Err(err))
 		var validateErrs validator.ValidationErrors
@@ -55,7 +56,7 @@ func (s *AuthService) Register(userDto *dto.CreateUser) (*models.User, string, e
 	hashedPassword, err := s.hashPassword(*user.Password)
 	if err != nil {
 		s.log.Error(op, "failed to hash password", sl.Err(err))
-		return nil, "", ErrInternalError
+		return nil, "", service.ErrInternalError
 	}
 	// Set hashed password
 	user.Password = &hashedPassword
@@ -69,17 +70,17 @@ func (s *AuthService) Register(userDto *dto.CreateUser) (*models.User, string, e
 		// Сheck if user already exists
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			s.log.Info(op, "user already exists", slog.String("email", *user.Email))
-			return nil, "", ErrUserAlreadyExists
+			return nil, "", service.ErrUserAlreadyExists
 		}
 		s.log.Error(op, "failed to create user", sl.Err(err))
-		return nil, "", ErrInternalError
+		return nil, "", service.ErrInternalError
 	}
 
 	// Generate JWT token
 	token, err := s.generateToken(user)
 	if err != nil {
 		s.log.Error(op, "failed to generate token", sl.Err(err))
-		return nil, "", ErrInternalError
+		return nil, "", service.ErrInternalError
 	}
 
 	return user, token, nil
@@ -89,8 +90,8 @@ func (s *AuthService) Login(email, password string) (*models.User, string, error
 	const op = "services.AuthService.Login"
 
 	// Validate email and password
-	emailErr := validate.Var(email, "required,email")
-	passErr := validate.Var(password, "required,min=8,max=255")
+	emailErr := service.Validate.Var(email, "required,email")
+	passErr := service.Validate.Var(password, "required,min=8,max=255")
 	if emailErr != nil || passErr != nil {
 		s.log.Info(op, "validation error", slog.String("error", "invalid email or password"))
 
@@ -111,23 +112,23 @@ func (s *AuthService) Login(email, password string) (*models.User, string, error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			s.log.Info(op, "user not found", slog.String("email", email))
 			fmt.Println("User not found:", err)
-			return nil, "", ErrInvalidCredentials
+			return nil, "", service.ErrInvalidCredentials
 		}
 		// Handle other errors
 		s.log.Error(op, "failed to get user", sl.Err(err))
-		return nil, "", ErrInternalError
+		return nil, "", service.ErrInternalError
 	}
 
 	// Check password
 	if !s.checkPassword(*user.Password, password) {
-		return nil, "", ErrInvalidCredentials
+		return nil, "", service.ErrInvalidCredentials
 	}
 
 	// Generate JWT token
 	token, err := s.generateToken(user)
 	if err != nil {
 		s.log.Error(op, "failed to generate token", sl.Err(err))
-		return nil, "", ErrInternalError
+		return nil, "", service.ErrInternalError
 	}
 
 	return user, token, nil
@@ -163,19 +164,19 @@ func (s *AuthService) ValidateToken(tokenString string) (*jwt.Token, error) {
 		// Check if the signing method is valid
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			s.log.Error("unexpected signing method", slog.String("method", token.Header["alg"].(string)))
-			return nil, ErrInvalidToken
+			return nil, service.ErrInvalidToken
 		}
 		return []byte(s.jwtSecret), nil
 	})
 
 	if err != nil {
 		s.log.Error("failed to parse token", sl.Err(err))
-		return nil, ErrInvalidToken
+		return nil, service.ErrInvalidToken
 	}
 
 	if !token.Valid {
 		s.log.Info("invalid token", slog.String("token", tokenString))
-		return nil, ErrInvalidToken
+		return nil, service.ErrInvalidToken
 	}
 
 	return token, nil

@@ -1,12 +1,14 @@
-package services_test
+package auth_service_test
 
 import (
 	"log/slog"
 	"reflect"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
-	"sdt-bicycle-rental/internal/services"
-	mocks "sdt-bicycle-rental/internal/services/mocks"
+	"sdt-bicycle-rental/internal/service"
+	auth_service "sdt-bicycle-rental/internal/service/auth"
+
+	mocks "sdt-bicycle-rental/internal/service/auth/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"sdt-bicycle-rental/lib/util"
 	"testing"
@@ -22,7 +24,7 @@ const (
 
 func TestAuthService_Register(t *testing.T) {
 	type fields struct {
-		repo      services.UserRepository
+		repo      auth_service.UserRepository
 		log       *slog.Logger
 		jwtSecret string
 	}
@@ -115,7 +117,7 @@ func TestAuthService_Register(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := services.NewAuthService(tt.fields.repo, tt.fields.log, tt.fields.jwtSecret)
+			s := auth_service.New(tt.fields.repo, tt.fields.log, tt.fields.jwtSecret)
 
 			switch tt.name {
 			case "success":
@@ -125,7 +127,7 @@ func TestAuthService_Register(t *testing.T) {
 			case "create error":
 				tt.fields.repo.(*mocks.UserRepository).
 					On("Create", mock.MatchedBy(func(u *models.User) bool { return true })).
-					Return(services.ErrInternalError).Once()
+					Return(service.ErrInternalError).Once()
 			}
 
 			got, got1, err := s.Register(tt.argUser)
@@ -157,7 +159,7 @@ func TestAuthService_Register(t *testing.T) {
 
 func TestAuthService_Login(t *testing.T) {
 	type fields struct {
-		repo      services.UserRepository
+		repo      auth_service.UserRepository
 		log       *slog.Logger
 		jwtSecret string
 	}
@@ -218,7 +220,7 @@ func TestAuthService_Login(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := services.NewAuthService(tt.fields.repo, tt.fields.log, tt.fields.jwtSecret)
+			s := auth_service.New(tt.fields.repo, tt.fields.log, tt.fields.jwtSecret)
 
 			switch tt.name {
 			case "success":

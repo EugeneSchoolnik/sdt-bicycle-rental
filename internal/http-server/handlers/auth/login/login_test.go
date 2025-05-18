@@ -10,7 +10,7 @@ import (
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/login"
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/login/mocks"
 	"sdt-bicycle-rental/internal/models"
-	"sdt-bicycle-rental/internal/services"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"sdt-bicycle-rental/lib/util"
 	"testing"
@@ -55,15 +55,15 @@ func TestLoginHandler(t *testing.T) {
 			name:      "incorrect password",
 			email:     "valid@email.com",
 			password:  "12345678",
-			resp:      resp{Code: http.StatusBadRequest, Error: services.ErrInvalidCredentials.Error()},
-			mockError: services.ErrInvalidCredentials,
+			resp:      resp{Code: http.StatusBadRequest, Error: service.ErrInvalidCredentials.Error()},
+			mockError: service.ErrInvalidCredentials,
 		},
 		{
 			name:      "internal error",
 			email:     "valid@email.com",
 			password:  "12345678",
-			resp:      resp{Code: http.StatusInternalServerError, Error: services.ErrInternalError.Error()},
-			mockError: services.ErrInternalError,
+			resp:      resp{Code: http.StatusInternalServerError, Error: service.ErrInternalError.Error()},
+			mockError: service.ErrInternalError,
 		},
 	}
 

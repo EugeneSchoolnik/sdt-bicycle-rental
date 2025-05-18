@@ -1,11 +1,13 @@
-package services
+package station_service_test
 
 import (
 	"errors"
 	"log/slog"
 	"reflect"
 	"sdt-bicycle-rental/internal/models"
-	mocks "sdt-bicycle-rental/internal/services/mocks"
+	"sdt-bicycle-rental/internal/service"
+	station_service "sdt-bicycle-rental/internal/service/station"
+	mocks "sdt-bicycle-rental/internal/service/station/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"testing"
 
@@ -14,7 +16,7 @@ import (
 
 func TestStationService_Create(t *testing.T) {
 	type fields struct {
-		repo StationRepositoty
+		repo station_service.StationRepositoty
 		log  *slog.Logger
 	}
 
@@ -62,16 +64,13 @@ func TestStationService_Create(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &StationService{
-				repo: tt.fields.repo,
-				log:  tt.fields.log,
-			}
+			s := station_service.New(tt.fields.repo, tt.fields.log)
 
 			switch tt.name {
 			case "success":
 				tt.fields.repo.(*mocks.StationRepositoty).On("Create", tt.argStation).Return(nil).Once()
 			case "repository error":
-				tt.fields.repo.(*mocks.StationRepositoty).On("Create", tt.argStation).Return(ErrInternalError).Once()
+				tt.fields.repo.(*mocks.StationRepositoty).On("Create", tt.argStation).Return(service.ErrInternalError).Once()
 			}
 
 			got, err := s.Create(tt.argStation)
@@ -88,7 +87,7 @@ func TestStationService_Create(t *testing.T) {
 
 func TestStationService_UpdateLocation(t *testing.T) {
 	type fields struct {
-		repo StationRepositoty
+		repo station_service.StationRepositoty
 		log  *slog.Logger
 	}
 	defaultFields := fields{
@@ -142,13 +141,10 @@ func TestStationService_UpdateLocation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &StationService{
-				repo: tt.fields.repo,
-				log:  tt.fields.log,
-			}
+			s := station_service.New(tt.fields.repo, tt.fields.log)
 
 			if !tt.mock.notNeeded {
-				s.repo.(*mocks.StationRepositoty).On("Update", tt.mock.arg).Return(tt.mock.resp).Once()
+				tt.fields.repo.(*mocks.StationRepositoty).On("Update", tt.mock.arg).Return(tt.mock.resp).Once()
 			}
 
 			if err := s.UpdateLocation(tt.args.id, tt.args.location); (err != nil) != tt.wantErr {
@@ -160,7 +156,7 @@ func TestStationService_UpdateLocation(t *testing.T) {
 
 func TestStationService_ByID(t *testing.T) {
 	type fields struct {
-		repo StationRepositoty
+		repo station_service.StationRepositoty
 		log  *slog.Logger
 	}
 	defaultFields := fields{
@@ -210,13 +206,10 @@ func TestStationService_ByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &StationService{
-				repo: tt.fields.repo,
-				log:  tt.fields.log,
-			}
+			s := station_service.New(tt.fields.repo, tt.fields.log)
 
 			if !tt.mock.notNeeded {
-				s.repo.(*mocks.StationRepositoty).On("GetByID", tt.argID).Return(tt.want, tt.mock.err).Once()
+				tt.fields.repo.(*mocks.StationRepositoty).On("GetByID", tt.argID).Return(tt.want, tt.mock.err).Once()
 			}
 
 			got, err := s.ByID(tt.argID)

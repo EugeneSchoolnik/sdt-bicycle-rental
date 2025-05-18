@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
-	"sdt-bicycle-rental/internal/services"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/sl"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -64,10 +64,10 @@ func New(s UserRegisterer, log *slog.Logger) http.HandlerFunc {
 
 		user, token, err := s.Register(&req.User)
 		if err != nil {
-			if errors.Is(err, services.ErrInternalError) {
+			if errors.Is(err, service.ErrInternalError) {
 				// internal error
 				w.WriteHeader(http.StatusInternalServerError)
-			} else if errors.Is(err, services.ErrUserAlreadyExists) {
+			} else if errors.Is(err, service.ErrUserAlreadyExists) {
 				// user exists error
 				w.WriteHeader(http.StatusConflict)
 			} else {

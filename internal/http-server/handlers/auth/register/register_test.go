@@ -10,7 +10,7 @@ import (
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/register"
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/register/mocks"
 	"sdt-bicycle-rental/internal/repository/dto"
-	"sdt-bicycle-rental/internal/services"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"testing"
 
@@ -51,14 +51,14 @@ func TestRegisterHandler(t *testing.T) {
 		{
 			name:      "user exists",
 			user:      user{Name: "John", Lastname: "Doe", Email: "valid@email.com", Phone: "1234567890", Password: "superpass"},
-			resp:      resp{Code: http.StatusConflict, Error: services.ErrUserAlreadyExists.Error()},
-			mockError: services.ErrUserAlreadyExists,
+			resp:      resp{Code: http.StatusConflict, Error: service.ErrUserAlreadyExists.Error()},
+			mockError: service.ErrUserAlreadyExists,
 		},
 		{
 			name:      "internal error",
 			user:      user{Name: "John", Lastname: "Doe", Email: "valid@email.com", Phone: "1234567890", Password: "superpass"},
-			resp:      resp{Code: http.StatusInternalServerError, Error: services.ErrInternalError.Error()},
-			mockError: services.ErrInternalError,
+			resp:      resp{Code: http.StatusInternalServerError, Error: service.ErrInternalError.Error()},
+			mockError: service.ErrInternalError,
 		},
 	}
 

@@ -79,9 +79,9 @@ func (_m *StationRepositoty) GetByID(id uint64) (*models.Station, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: user
-func (_m *StationRepositoty) Update(user *models.Station) error {
-	ret := _m.Called(user)
+// Update provides a mock function with given fields: station
+func (_m *StationRepositoty) Update(station *models.Station) error {
+	ret := _m.Called(station)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
@@ -89,7 +89,7 @@ func (_m *StationRepositoty) Update(user *models.Station) error {
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.Station) error); ok {
-		r0 = rf(user)
+		r0 = rf(station)
 	} else {
 		r0 = ret.Error(0)
 	}

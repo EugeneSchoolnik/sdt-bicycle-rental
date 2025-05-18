@@ -7,7 +7,7 @@ import (
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/register"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/postgres"
-	"sdt-bicycle-rental/internal/services"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"strings"
 	"testing"
@@ -73,7 +73,7 @@ func TestAuthHandler(t *testing.T) {
 			{
 				name:     "user exists error",
 				body:     `{"user":{"name":"John","lastname":"Doe","email":"john@example.com","phone":"123456","password":"12345678"}}`,
-				wantResp: resp{Code: http.StatusConflict, Error: services.ErrUserAlreadyExists.Error()},
+				wantResp: resp{Code: http.StatusConflict, Error: service.ErrUserAlreadyExists.Error()},
 			},
 		}
 

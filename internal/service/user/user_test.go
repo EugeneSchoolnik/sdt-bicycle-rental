@@ -1,12 +1,12 @@
-package services_test
+package user_service_test
 
 import (
 	"log/slog"
 	"reflect"
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
-	"sdt-bicycle-rental/internal/services"
-	mocks "sdt-bicycle-rental/internal/services/mocks"
+	user_service "sdt-bicycle-rental/internal/service/user"
+	mocks "sdt-bicycle-rental/internal/service/user/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"sdt-bicycle-rental/lib/util"
 	"testing"
@@ -16,7 +16,7 @@ import (
 
 func TestUserService_ProfileByID(t *testing.T) {
 	type fields struct {
-		repo services.UserRepository
+		repo user_service.UserRepository
 		log  *slog.Logger
 	}
 
@@ -54,7 +54,7 @@ func TestUserService_ProfileByID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := services.NewUserService(tt.fields.repo, tt.fields.log)
+			s := user_service.New(tt.fields.repo, tt.fields.log)
 
 			switch tt.name {
 			case "success":
@@ -78,7 +78,7 @@ func TestUserService_ProfileByID(t *testing.T) {
 
 func TestUserService_Update(t *testing.T) {
 	type fields struct {
-		repo services.UserRepository
+		repo user_service.UserRepository
 		log  *slog.Logger
 	}
 
@@ -137,7 +137,7 @@ func TestUserService_Update(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := services.NewUserService(tt.fields.repo, tt.fields.log)
+			s := user_service.New(tt.fields.repo, tt.fields.log)
 
 			updateModel := models.User{
 				ID:       tt.args.id,
@@ -161,7 +161,7 @@ func TestUserService_Update(t *testing.T) {
 
 func TestUserService_Delete(t *testing.T) {
 	type fields struct {
-		repo services.UserRepository
+		repo user_service.UserRepository
 		log  *slog.Logger
 	}
 
@@ -191,7 +191,7 @@ func TestUserService_Delete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := services.NewUserService(tt.fields.repo, tt.fields.log)
+			s := user_service.New(tt.fields.repo, tt.fields.log)
 
 			switch tt.name {
 			case "success":

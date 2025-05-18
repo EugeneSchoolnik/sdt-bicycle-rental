@@ -1,10 +1,6 @@
-package services
+package service
 
-import (
-	"errors"
-
-	"github.com/go-playground/validator/v10"
-)
+import "errors"
 
 var (
 	// Common
@@ -16,5 +12,3 @@ var (
 	ErrUserAlreadyExists  = errors.New("user already exists")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 )
-
-var validate = validator.New(validator.WithRequiredStructEnabled())

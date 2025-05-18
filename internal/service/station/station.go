@@ -1,9 +1,10 @@
-package services
+package station_service
 
 import (
 	"errors"
 	"log/slog"
 	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/sl"
 	"sdt-bicycle-rental/lib/validation"
 
@@ -26,7 +27,7 @@ type StationService struct {
 	log  *slog.Logger
 }
 
-func NewStationService(repo StationRepositoty, log *slog.Logger) *StationService {
+func New(repo StationRepositoty, log *slog.Logger) *StationService {
 	return &StationService{repo, log}
 }
 
@@ -34,7 +35,7 @@ func (s *StationService) Create(station *models.Station) (*models.Station, error
 	const op = "services.StationService.Create"
 
 	// Validate station data
-	err := validate.Struct(station)
+	err := service.Validate.Struct(station)
 	if err != nil {
 		s.log.Info(op, "validation error", sl.Err(err))
 		return nil, validation.PrettyError(err.(validator.ValidationErrors))
@@ -43,7 +44,7 @@ func (s *StationService) Create(station *models.Station) (*models.Station, error
 	err = s.repo.Create(station)
 	if err != nil {
 		s.log.Error(op, "failed to create station", sl.Err(err))
-		return nil, ErrInternalError
+		return nil, service.ErrInternalError
 	}
 
 	return station, nil
@@ -56,10 +57,10 @@ func (s *StationService) ByID(id uint64) (*models.Station, error) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			s.log.Info(op, "station not found", slog.Uint64("id", id))
-			return nil, ErrInvalidCredentials
+			return nil, service.ErrInvalidCredentials
 		}
 		s.log.Error(op, "failed to get station", sl.Err(err))
-		return nil, ErrInternalError
+		return nil, service.ErrInternalError
 	}
 
 	return station, nil
@@ -74,7 +75,7 @@ func (s *StationService) UpdateLocation(id uint64, location string) error {
 	}
 
 	// Validate station data
-	err := validate.Struct(station)
+	err := service.Validate.Struct(station)
 	if err != nil {
 		s.log.Info(op, "validation error", sl.Err(err))
 		return validation.PrettyError(err.(validator.ValidationErrors))
@@ -84,10 +85,10 @@ func (s *StationService) UpdateLocation(id uint64, location string) error {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			s.log.Info(op, "station not found", slog.Uint64("id", id), slog.String("location", location))
-			return ErrInvalidCredentials
+			return service.ErrInvalidCredentials
 		}
 		s.log.Error(op, "failed to udpate station", sl.Err(err))
-		return ErrInternalError
+		return service.ErrInternalError
 	}
 
 	return nil
@@ -99,7 +100,7 @@ func (s *StationService) Delete(id uint64) error {
 	err := s.repo.Delete(id)
 	if err != nil {
 		s.log.Error(op, "failed to delete station", slog.Uint64("id", id), sl.Err(err))
-		return ErrInternalError
+		return service.ErrInternalError
 	}
 
 	return nil
