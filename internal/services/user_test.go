@@ -89,7 +89,7 @@ func TestUserService_Update(t *testing.T) {
 
 	type args struct {
 		id   uint64
-		user *dto.UpdateUserDTO
+		user *dto.UpdateUser
 	}
 	tests := []struct {
 		name    string
@@ -102,7 +102,7 @@ func TestUserService_Update(t *testing.T) {
 			fields: defaultFields,
 			args: args{
 				id: 1,
-				user: &dto.UpdateUserDTO{
+				user: &dto.UpdateUser{
 					Name:     Ptr("John"),
 					Lastname: Ptr("Doe"),
 					Email:    Ptr("valid@email.com"),
@@ -115,7 +115,7 @@ func TestUserService_Update(t *testing.T) {
 			fields: defaultFields,
 			args: args{
 				id: 1,
-				user: &dto.UpdateUserDTO{
+				user: &dto.UpdateUser{
 					Name:  Ptr(""),
 					Email: Ptr("valid@email.com"),
 				},
@@ -127,7 +127,7 @@ func TestUserService_Update(t *testing.T) {
 			fields: defaultFields,
 			args: args{
 				id: 1,
-				user: &dto.UpdateUserDTO{
+				user: &dto.UpdateUser{
 					Name:  Ptr("Tomas"),
 					Email: Ptr("invalid@email"),
 				},

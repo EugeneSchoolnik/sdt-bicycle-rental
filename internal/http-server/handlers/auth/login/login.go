@@ -16,11 +16,12 @@ type Request struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-
-type Response struct {
-	User  *models.User `json:"user,omitempty"`
-	Token string       `json:"token,omitempty"`
-	Error string       `json:"error,omitempty"`
+type SuccessResponse struct {
+	User  *models.User `json:"user"`
+	Token string       `json:"token"`
+}
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
 //go:generate mockery --name=UserLoginer
@@ -28,6 +29,19 @@ type UserLoginer interface {
 	Login(email, password string) (*models.User, string, error)
 }
 
+// New returns login handler
+//
+//	@Summary      Login
+//	@Description  login a user
+//	@Tags         auth
+//	@Accept       json
+//	@Produce      json
+//	@Param        request body 		Request true "User login data"
+//	@Success      201  {object}   	SuccessResponse
+//	@Failure      400  {object}		ErrorResponse
+//	@Failure      409  {object}		ErrorResponse
+//	@Failure      500  {object}		ErrorResponse
+//	@Router       /auth/login [post]
 func New(s UserLoginer, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.auth.login.New"
@@ -43,7 +57,7 @@ func New(s UserLoginer, log *slog.Logger) http.HandlerFunc {
 			log.Error("failed to decode request body", sl.Err(err))
 
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, Response{Error: "invalid input"})
+			render.JSON(w, r, ErrorResponse{Error: "invalid input"})
 			return
 		}
 
@@ -54,13 +68,13 @@ func New(s UserLoginer, log *slog.Logger) http.HandlerFunc {
 			} else {
 				w.WriteHeader(http.StatusBadRequest)
 			}
-			render.JSON(w, r, Response{Error: err.Error()})
+			render.JSON(w, r, ErrorResponse{Error: err.Error()})
 			return
 		}
 
 		log.Info("user authorized", slog.Uint64("id", user.ID))
 
 		w.WriteHeader(http.StatusOK)
-		render.JSON(w, r, Response{User: user, Token: token})
+		render.JSON(w, r, SuccessResponse{User: user, Token: token})
 	}
 }

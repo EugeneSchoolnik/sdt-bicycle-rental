@@ -91,16 +91,16 @@ func TestLoginHandler(t *testing.T) {
 			require.Equal(t, rr.Code, tc.resp.Code)
 			body := rr.Body.String()
 
-			var resp login.Response
-
-			require.NoError(t, json.Unmarshal([]byte(body), &resp))
-
 			if rr.Code == http.StatusCreated {
+				var resp login.SuccessResponse
+				require.NoError(t, json.Unmarshal([]byte(body), &resp))
 				assert.NotEqual(t, resp.User, nil)
 				assert.NotEmpty(t, resp.Token)
-				assert.Empty(t, resp.Error)
+				return
 			}
 
+			var resp login.ErrorResponse
+			require.NoError(t, json.Unmarshal([]byte(body), &resp))
 			require.Equal(t, tc.resp.Error, resp.Error)
 		})
 	}

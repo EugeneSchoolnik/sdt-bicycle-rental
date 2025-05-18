@@ -1,0 +1,282 @@
+definitions:
+  dto.CreateUser:
+    properties:
+      email:
+        type: string
+      lastname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+      password:
+        maxLength: 255
+        minLength: 8
+        type: string
+      phone:
+        maxLength: 64
+        type: string
+    required:
+    - email
+    - lastname
+    - name
+    - password
+    - phone
+    type: object
+  login.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  login.Request:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  login.SuccessResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  models.Bicycle:
+    properties:
+      id:
+        type: integer
+      lastService:
+        type: string
+      station:
+        $ref: '#/definitions/models.Station'
+      stationID:
+        type: integer
+      status:
+        type: string
+    type: object
+  models.Booking:
+    properties:
+      bicycle:
+        $ref: '#/definitions/models.Bicycle'
+      bicycleID:
+        type: integer
+      createdAt:
+        type: string
+      expiresAt:
+        type: string
+      id:
+        type: integer
+      payment:
+        $ref: '#/definitions/models.Payment'
+      paymentID:
+        type: integer
+      station:
+        $ref: '#/definitions/models.Station'
+      stationID:
+        type: integer
+      user:
+        $ref: '#/definitions/models.User'
+      userID:
+        type: integer
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      id:
+        type: integer
+      method:
+        type: string
+      status:
+        type: string
+      transactionID:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      userID:
+        type: integer
+    type: object
+  models.Rental:
+    properties:
+      bicycle:
+        $ref: '#/definitions/models.Bicycle'
+      bicycleID:
+        type: integer
+      endTime:
+        type: string
+      id:
+        type: integer
+      startTime:
+        type: string
+      stationEnd:
+        $ref: '#/definitions/models.Station'
+      stationEndID:
+        type: integer
+      stationStart:
+        $ref: '#/definitions/models.Station'
+      stationStartID:
+        type: integer
+      totalCost:
+        type: number
+      user:
+        $ref: '#/definitions/models.User'
+      userID:
+        type: integer
+    type: object
+  models.Station:
+    properties:
+      bikesAvailable:
+        type: integer
+      bikesTotal:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      locationStreet:
+        maxLength: 100
+        minLength: 8
+        type: string
+    required:
+    - locationStreet
+    type: object
+  models.User:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/models.Booking'
+        type: array
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      lastname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+      password:
+        maxLength: 255
+        minLength: 8
+        type: string
+      payments:
+        items:
+          $ref: '#/definitions/models.Payment'
+        type: array
+      phone:
+        maxLength: 64
+        type: string
+      rentals:
+        items:
+          $ref: '#/definitions/models.Rental'
+        type: array
+      status:
+        type: string
+    required:
+    - email
+    - lastname
+    - name
+    - password
+    - phone
+    type: object
+  register.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  register.Request:
+    properties:
+      user:
+        $ref: '#/definitions/dto.CreateUser'
+    type: object
+  register.SuccessResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+info:
+  contact: {}
+  title: Swagger BicycleRental API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login a user
+      parameters:
+      - description: User login data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/login.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/login.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/login.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/login.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/login.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: register a user
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/register.Request'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/register.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/register.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/register.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/register.ErrorResponse'
+      summary: Register
+      tags:
+      - auth
+swagger: "2.0"

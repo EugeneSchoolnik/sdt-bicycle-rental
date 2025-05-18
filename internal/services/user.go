@@ -40,7 +40,7 @@ func (s *UserService) ProfileByID(id uint64) (*models.User, error) {
 }
 
 // TODO: return updated user
-func (s *UserService) Update(id uint64, user *dto.UpdateUserDTO) error {
+func (s *UserService) Update(id uint64, user *dto.UpdateUser) error {
 	const op = "services.UserService.Update"
 
 	// Validate user

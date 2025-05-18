@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/repository/dto"
 	"sdt-bicycle-rental/internal/services"
 	"sdt-bicycle-rental/lib/logger/sl"
 
@@ -13,20 +14,34 @@ import (
 )
 
 type Request struct {
-	User *models.User `json:"user"`
+	User dto.CreateUser `json:"user"`
 }
-
-type Response struct {
-	User  *models.User `json:"user,omitempty"`
-	Token string       `json:"token,omitempty"`
-	Error string       `json:"error,omitempty"`
+type SuccessResponse struct {
+	User  *models.User `json:"user"`
+	Token string       `json:"token"`
+}
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
 //go:generate mockery --name=UserRegisterer
 type UserRegisterer interface {
-	Register(user *models.User) (*models.User, string, error)
+	Register(user *dto.CreateUser) (*models.User, string, error)
 }
 
+// New returns register handler
+//
+//	@Summary      Register
+//	@Description  register a user
+//	@Tags         auth
+//	@Accept       json
+//	@Produce      json
+//	@Param        request body 		Request true "User registration data"
+//	@Success      201  {object}   	SuccessResponse
+//	@Failure      400  {object}		ErrorResponse
+//	@Failure      409  {object}		ErrorResponse
+//	@Failure      500  {object}		ErrorResponse
+//	@Router       /auth/register [post]
 func New(s UserRegisterer, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.auth.register.New"
@@ -42,12 +57,12 @@ func New(s UserRegisterer, log *slog.Logger) http.HandlerFunc {
 			log.Error("failed to decode request body", sl.Err(err))
 
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, Response{Error: "invalid input"})
+			render.JSON(w, r, ErrorResponse{Error: "invalid input"})
 
 			return
 		}
 
-		user, token, err := s.Register(req.User)
+		user, token, err := s.Register(&req.User)
 		if err != nil {
 			if errors.Is(err, services.ErrInternalError) {
 				// internal error
@@ -59,13 +74,13 @@ func New(s UserRegisterer, log *slog.Logger) http.HandlerFunc {
 				// other errors
 				w.WriteHeader(http.StatusBadRequest)
 			}
-			render.JSON(w, r, Response{Error: err.Error()})
+			render.JSON(w, r, ErrorResponse{Error: err.Error()})
 			return
 		}
 
 		log.Info("user registered", slog.Uint64("id", user.ID))
 
 		w.WriteHeader(http.StatusCreated)
-		render.JSON(w, r, Response{User: user, Token: token})
+		render.JSON(w, r, SuccessResponse{User: user, Token: token})
 	}
 }

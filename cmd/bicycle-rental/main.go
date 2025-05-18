@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	_ "sdt-bicycle-rental/docs"
 	"sdt-bicycle-rental/internal/config"
 	"sdt-bicycle-rental/internal/http-server/handlers/auth"
 	"sdt-bicycle-rental/internal/repository/postgres"
@@ -11,8 +12,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title           Swagger BicycleRental API
+// @version         1.0
 func main() { // go run ./cmd/bicycle-rental/main.go
 	// Load the configuration
 	cfg := config.MustLoad()
@@ -40,9 +44,7 @@ func main() { // go run ./cmd/bicycle-rental/main.go
 	router.Use(middleware.URLFormat)
 
 	// routes
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world"))
-	})
+	router.Get("/swagger/*", httpSwagger.WrapHandler)
 	router.Route("/auth", auth.AuthRoute(log, userRepo, cfg.JwtSecret))
 
 	// Start the server

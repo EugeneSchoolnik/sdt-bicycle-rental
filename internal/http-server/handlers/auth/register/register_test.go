@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/register"
 	"sdt-bicycle-rental/internal/http-server/handlers/auth/register/mocks"
-	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/repository/dto"
 	"sdt-bicycle-rental/internal/services"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	"testing"
@@ -68,13 +68,13 @@ func TestRegisterHandler(t *testing.T) {
 
 			userRegistererMock := mocks.NewUserRegisterer(t)
 
-			var userModel models.User
+			var userModel dto.CreateUser
 			inputUser, _ := json.Marshal(tc.user)
 			json.Unmarshal(inputUser, &userModel)
 
 			if tc.resp.Error == "" || tc.mockError != nil {
 				mockCall := userRegistererMock.On("Register", &userModel)
-				mockCall.Return(&userModel, "token", tc.mockError).Once()
+				mockCall.Return(userModel.Model(), "token", tc.mockError).Once()
 			}
 
 			handler := register.New(userRegistererMock, slogdiscard.NewDiscardLogger())
@@ -90,16 +90,16 @@ func TestRegisterHandler(t *testing.T) {
 			require.Equal(t, rr.Code, tc.resp.Code)
 			body := rr.Body.String()
 
-			var resp register.Response
-
-			require.NoError(t, json.Unmarshal([]byte(body), &resp))
-
 			if rr.Code == http.StatusCreated {
+				var resp register.SuccessResponse
+				require.NoError(t, json.Unmarshal([]byte(body), &resp))
 				assert.NotEqual(t, resp.User, nil)
 				assert.NotEmpty(t, resp.Token)
-				assert.Empty(t, resp.Error)
+				return
 			}
 
+			var resp register.ErrorResponse
+			require.NoError(t, json.Unmarshal([]byte(body), &resp))
 			require.Equal(t, tc.resp.Error, resp.Error)
 		})
 	}

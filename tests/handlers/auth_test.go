@@ -48,7 +48,7 @@ func TestAuthHandler(t *testing.T) {
 			{
 				name:     "invalid name",
 				body:     `{"user":{"name":"","lastname":"Doe","email":"john@example.com","phone":"123456","password":"12345678"}}`,
-				wantResp: resp{Code: http.StatusBadRequest, Error: "field Name is not valid"},
+				wantResp: resp{Code: http.StatusBadRequest, Error: "field Name is a required field"},
 			},
 			{
 				name:     "invalid email",
@@ -63,7 +63,7 @@ func TestAuthHandler(t *testing.T) {
 			{
 				name:     "invalid name and email",
 				body:     `{"user":{"name":"","lastname":"Doe","email":"example.com","phone":"123456","password":"12345678"}}`,
-				wantResp: resp{Code: http.StatusBadRequest, Error: "field Name is not valid, field Email is not a valid email"},
+				wantResp: resp{Code: http.StatusBadRequest, Error: "field Name is a required field, field Email is not a valid email"},
 			},
 			{
 				name:     "invalid body",
@@ -87,10 +87,9 @@ func TestAuthHandler(t *testing.T) {
 
 				assert.Equal(t, tt.wantResp.Code, resp.Code)
 
-				var response register.Response
-				require.NoError(t, render.DecodeJSON(resp.Body, &response))
-
 				if tt.wantResp.Error == "" {
+					var response register.SuccessResponse
+					require.NoError(t, render.DecodeJSON(resp.Body, &response))
 					// database
 					var user models.User
 					err := db.First(&user, "email = ?", *response.User.Email).Error
@@ -102,8 +101,10 @@ func TestAuthHandler(t *testing.T) {
 					return
 				}
 
+				var response register.ErrorResponse
+				require.NoError(t, render.DecodeJSON(resp.Body, &response))
 				assert.Equal(t, tt.wantResp.Error, response.Error)
-				assert.Empty(t, response.Token)
+
 			})
 		}
 	})

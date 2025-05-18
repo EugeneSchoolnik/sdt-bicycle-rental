@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/repository/dto"
 	"sdt-bicycle-rental/lib/logger/sl"
 	. "sdt-bicycle-rental/lib/ptr"
 	"sdt-bicycle-rental/lib/validation"
@@ -36,17 +37,19 @@ func NewAuthService(repo UserRepository, log *slog.Logger, jwtSecret string) *Au
 	return &AuthService{repo: repo, log: log, jwtSecret: jwtSecret}
 }
 
-func (s *AuthService) Register(user *models.User) (*models.User, string, error) {
+func (s *AuthService) Register(userDto *dto.CreateUser) (*models.User, string, error) {
 	const op = "services.AuthService.Register"
 
 	// Validate user data
-	err := validate.Struct(user)
+	err := validate.Struct(userDto)
 	if err != nil {
 		s.log.Info(op, "validation error", sl.Err(err))
 		var validateErrs validator.ValidationErrors
 		errors.As(err, &validateErrs)
 		return nil, "", validation.PrettyError(validateErrs)
 	}
+
+	user := userDto.Model()
 
 	// Hash password
 	hashedPassword, err := s.hashPassword(*user.Password)

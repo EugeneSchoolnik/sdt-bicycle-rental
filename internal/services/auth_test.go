@@ -4,12 +4,14 @@ import (
 	"log/slog"
 	"reflect"
 	"sdt-bicycle-rental/internal/models"
+	"sdt-bicycle-rental/internal/repository/dto"
 	"sdt-bicycle-rental/internal/services"
-	mock "sdt-bicycle-rental/internal/services/mocks"
+	mocks "sdt-bicycle-rental/internal/services/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
 	. "sdt-bicycle-rental/lib/ptr"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +20,7 @@ const (
 	invalidEmail = "invalid-email"
 )
 
-func TestUserService_Register(t *testing.T) {
+func TestAuthService_Register(t *testing.T) {
 	type fields struct {
 		repo      services.UserRepository
 		log       *slog.Logger
@@ -26,7 +28,7 @@ func TestUserService_Register(t *testing.T) {
 	}
 
 	defaultFields := fields{
-		repo:      mock.NewUserRepository(t),
+		repo:      mocks.NewUserRepository(t),
 		log:       slogdiscard.NewDiscardLogger(),
 		jwtSecret: "secret",
 	}
@@ -34,19 +36,19 @@ func TestUserService_Register(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		argUser *models.User
+		argUser *dto.CreateUser
 		want    *models.User
 		wantErr bool
 	}{
 		{
 			name:   "success",
 			fields: defaultFields,
-			argUser: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Password: Ptr("password"),
+			argUser: &dto.CreateUser{
+				Name:     "John",
+				Lastname: "Doe",
+				Email:    validEmail,
+				Phone:    "1234567890",
+				Password: "password",
 			},
 			want: &models.User{
 				Name:     Ptr("John"),
@@ -59,40 +61,40 @@ func TestUserService_Register(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:   "validation error 1",
+			name:   "validation error: name",
 			fields: defaultFields,
-			argUser: &models.User{
-				Name:     Ptr(""),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Password: Ptr("password"),
+			argUser: &dto.CreateUser{
+				Name:     "",
+				Lastname: "Doe",
+				Email:    validEmail,
+				Phone:    "1234567890",
+				Password: "password",
 			},
 			want:    nil,
 			wantErr: true,
 		},
 		{
-			name:   "validation error 2",
+			name:   "validation error: email",
 			fields: defaultFields,
-			argUser: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr("invalid-email"),
-				Phone:    Ptr("1234567890"),
-				Password: Ptr("password"),
+			argUser: &dto.CreateUser{
+				Name:     "John",
+				Lastname: "Doe",
+				Email:    "invalid-emal",
+				Phone:    "1234567890",
+				Password: "password",
 			},
 			want:    nil,
 			wantErr: true,
 		},
 		{
-			name:   "validation error 3",
+			name:   "validation error: password",
 			fields: defaultFields,
-			argUser: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Password: Ptr(""),
+			argUser: &dto.CreateUser{
+				Name:     "John",
+				Lastname: "Doe",
+				Email:    validEmail,
+				Phone:    "1234567890",
+				Password: "",
 			},
 			want:    nil,
 			wantErr: true,
@@ -100,12 +102,12 @@ func TestUserService_Register(t *testing.T) {
 		{
 			name:   "create error",
 			fields: defaultFields,
-			argUser: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Password: Ptr("password"),
+			argUser: &dto.CreateUser{
+				Name:     "John",
+				Lastname: "Doe",
+				Email:    validEmail,
+				Phone:    "1234567890",
+				Password: "password",
 			},
 			want:    nil,
 			wantErr: true,
@@ -117,9 +119,13 @@ func TestUserService_Register(t *testing.T) {
 
 			switch tt.name {
 			case "success":
-				tt.fields.repo.(*mock.UserRepository).On("Create", tt.argUser).Return(nil).Once()
+				tt.fields.repo.(*mocks.UserRepository).
+					On("Create", mock.MatchedBy(func(u *models.User) bool { return true })).
+					Return(nil).Once()
 			case "create error":
-				tt.fields.repo.(*mock.UserRepository).On("Create", tt.argUser).Return(services.ErrInternalError).Once()
+				tt.fields.repo.(*mocks.UserRepository).
+					On("Create", mock.MatchedBy(func(u *models.User) bool { return true })).
+					Return(services.ErrInternalError).Once()
 			}
 
 			got, got1, err := s.Register(tt.argUser)
@@ -157,7 +163,7 @@ func TestAuthService_Login(t *testing.T) {
 	}
 
 	defaultFields := fields{
-		repo:      mock.NewUserRepository(t),
+		repo:      mocks.NewUserRepository(t),
 		log:       slogdiscard.NewDiscardLogger(),
 		jwtSecret: "secret",
 	}
@@ -199,6 +205,16 @@ func TestAuthService_Login(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name:   "too small password",
+			fields: defaultFields,
+			args: args{
+				email:    validEmail,
+				password: "pass",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -206,7 +222,7 @@ func TestAuthService_Login(t *testing.T) {
 
 			switch tt.name {
 			case "success":
-				tt.fields.repo.(*mock.UserRepository).On("GetByEmail", tt.args.email).Return(tt.want, nil).Once()
+				tt.fields.repo.(*mocks.UserRepository).On("GetByEmail", tt.args.email).Return(tt.want, nil).Once()
 			}
 
 			got, got1, err := s.Login(tt.args.email, tt.args.password)
