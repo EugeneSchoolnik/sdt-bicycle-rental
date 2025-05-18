@@ -8,7 +8,7 @@ import (
 	"sdt-bicycle-rental/internal/services"
 	mocks "sdt-bicycle-rental/internal/services/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
-	. "sdt-bicycle-rental/lib/ptr"
+	"sdt-bicycle-rental/lib/util"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -51,11 +51,11 @@ func TestAuthService_Register(t *testing.T) {
 				Password: "password",
 			},
 			want: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Status:   Ptr(models.UserStatusActive),
+				Name:     util.Ptr("John"),
+				Lastname: util.Ptr("Doe"),
+				Email:    util.Ptr(validEmail),
+				Phone:    util.Ptr("1234567890"),
+				Status:   util.Ptr(models.UserStatusActive),
 				Password: nil,
 			},
 			wantErr: false,
@@ -186,12 +186,12 @@ func TestAuthService_Login(t *testing.T) {
 				password: "password",
 			},
 			want: &models.User{
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr(validEmail),
-				Phone:    Ptr("1234567890"),
-				Status:   Ptr(models.UserStatusActive),
-				Password: Ptr("$2a$10$Qz4ERCPWmdyNe7DR5H19RubOlA7drtlD9VCVYl8N9QjcqhueonsM6"),
+				Name:     util.Ptr("John"),
+				Lastname: util.Ptr("Doe"),
+				Email:    util.Ptr(validEmail),
+				Phone:    util.Ptr("1234567890"),
+				Status:   util.Ptr(models.UserStatusActive),
+				Password: util.Ptr("$2a$10$Qz4ERCPWmdyNe7DR5H19RubOlA7drtlD9VCVYl8N9QjcqhueonsM6"),
 			},
 			wantErr: false,
 		},

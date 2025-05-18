@@ -12,7 +12,7 @@ import (
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/services"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
-	. "sdt-bicycle-rental/lib/ptr"
+	"sdt-bicycle-rental/lib/util"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,8 +40,8 @@ func TestLoginHandler(t *testing.T) {
 			resp:     resp{Code: http.StatusOK},
 			mockUser: &models.User{
 				ID:       1,
-				Email:    Ptr("valid@email.com"),
-				Password: Ptr("hashed_password"),
+				Email:    util.Ptr("valid@email.com"),
+				Password: util.Ptr("hashed_password"),
 			},
 		},
 		{

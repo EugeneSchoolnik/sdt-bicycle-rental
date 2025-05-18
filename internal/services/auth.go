@@ -7,7 +7,7 @@ import (
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/dto"
 	"sdt-bicycle-rental/lib/logger/sl"
-	. "sdt-bicycle-rental/lib/ptr"
+	"sdt-bicycle-rental/lib/util"
 	"sdt-bicycle-rental/lib/validation"
 	"time"
 
@@ -61,7 +61,7 @@ func (s *AuthService) Register(userDto *dto.CreateUser) (*models.User, string, e
 	user.Password = &hashedPassword
 
 	// Set user status
-	user.Status = Ptr(models.UserStatusActive)
+	user.Status = util.Ptr(models.UserStatusActive)
 
 	// Create new user
 	err = s.repo.Create(user)

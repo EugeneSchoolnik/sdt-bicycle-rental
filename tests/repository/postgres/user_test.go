@@ -3,7 +3,7 @@ package repository_postgres_test
 import (
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/postgres"
-	. "sdt-bicycle-rental/lib/ptr"
+	. "sdt-bicycle-rental/lib/util"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

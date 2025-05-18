@@ -8,7 +8,7 @@ import (
 	"sdt-bicycle-rental/internal/services"
 	mocks "sdt-bicycle-rental/internal/services/mocks"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
-	. "sdt-bicycle-rental/lib/ptr"
+	"sdt-bicycle-rental/lib/util"
 	"testing"
 
 	"gorm.io/gorm"
@@ -38,9 +38,9 @@ func TestUserService_ProfileByID(t *testing.T) {
 			argID:  43,
 			want: &models.User{
 				ID:       43,
-				Name:     Ptr("John"),
-				Lastname: Ptr("Doe"),
-				Email:    Ptr("valid@email.com"),
+				Name:     util.Ptr("John"),
+				Lastname: util.Ptr("Doe"),
+				Email:    util.Ptr("valid@email.com"),
 			},
 			wantErr: false,
 		},
@@ -103,9 +103,9 @@ func TestUserService_Update(t *testing.T) {
 			args: args{
 				id: 1,
 				user: &dto.UpdateUser{
-					Name:     Ptr("John"),
-					Lastname: Ptr("Doe"),
-					Email:    Ptr("valid@email.com"),
+					Name:     util.Ptr("John"),
+					Lastname: util.Ptr("Doe"),
+					Email:    util.Ptr("valid@email.com"),
 				},
 			},
 			wantErr: false,
@@ -116,8 +116,8 @@ func TestUserService_Update(t *testing.T) {
 			args: args{
 				id: 1,
 				user: &dto.UpdateUser{
-					Name:  Ptr(""),
-					Email: Ptr("valid@email.com"),
+					Name:  util.Ptr(""),
+					Email: util.Ptr("valid@email.com"),
 				},
 			},
 			wantErr: true,
@@ -128,8 +128,8 @@ func TestUserService_Update(t *testing.T) {
 			args: args{
 				id: 1,
 				user: &dto.UpdateUser{
-					Name:  Ptr("Tomas"),
-					Email: Ptr("invalid@email"),
+					Name:  util.Ptr("Tomas"),
+					Email: util.Ptr("invalid@email"),
 				},
 			},
 			wantErr: true,
