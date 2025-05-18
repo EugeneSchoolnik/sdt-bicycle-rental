@@ -4,6 +4,7 @@ import (
 	"sdt-bicycle-rental/internal/models"
 	"sdt-bicycle-rental/internal/repository/postgres"
 	. "sdt-bicycle-rental/lib/util"
+	test_postgres "sdt-bicycle-rental/tests/util/db/postgres"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,10 +13,10 @@ import (
 )
 
 func TestUserRepository(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := test_postgres.SetupTestDB(t)
 	defer cleanup()
 
-	clearTable(t, db, "users")
+	test_postgres.ClearTable(t, db, "users")
 
 	repo := postgres.NewUserRepository(db)
 

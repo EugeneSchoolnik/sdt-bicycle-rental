@@ -9,6 +9,7 @@ import (
 	"sdt-bicycle-rental/internal/repository/postgres"
 	"sdt-bicycle-rental/internal/service"
 	"sdt-bicycle-rental/lib/logger/handlers/slogdiscard"
+	test_postgres "sdt-bicycle-rental/tests/util/db/postgres"
 	"strings"
 	"testing"
 
@@ -19,10 +20,10 @@ import (
 )
 
 func TestAuthHandler(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := test_postgres.SetupTestDB(t)
 	defer cleanup()
 
-	clearTable(t, db, "users")
+	test_postgres.ClearTable(t, db, "users")
 
 	userRepo := postgres.NewUserRepository(db)
 
